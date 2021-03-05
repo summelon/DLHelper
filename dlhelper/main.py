@@ -20,7 +20,7 @@ def main():
     eval_loader = preprocess.prepare_loader(
             args.dataset, batch_size=args.batch_size,
             is_train=False, num_workers=args.num_workers)
-    num_class = len(train_loader.dataset.class_names)
+    num_class = len(train_loader.dataset.classes)
 
     model = ResNet(
             num_class,

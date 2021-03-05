@@ -251,9 +251,9 @@ def grid_cam(cam_model, dataset, file_name, size=3):
         cam = gen_cam(cam_model, image, label)
 
         plt.figure(1)
-        draw_subplot(size, ax_pos, cam, dataset.class_names[label])
+        draw_subplot(size, ax_pos, cam, dataset.classes[label])
         plt.figure(2)
-        draw_subplot(size, ax_pos, image, dataset.class_names[label])
+        draw_subplot(size, ax_pos, image, dataset.classes[label])
 
     plt.figure(1)
     plt.savefig(file_name, dpi=1200)
@@ -299,7 +299,7 @@ if __name__ == '__main__':
 
     dataset = CustomDataset.TorchDataset(args.dataset, is_train=False)
     resnet = CustomModel.ResNet(
-            len(dataset.class_names), arch='resnet50', finetune=False)
+            len(dataset.classes), arch='resnet50', finetune=False)
     resnet = load_weight(resnet, args.pretrained)
 
     # Use the real backbone model inside

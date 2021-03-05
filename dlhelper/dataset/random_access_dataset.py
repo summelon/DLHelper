@@ -15,7 +15,13 @@ READER = {
 
 
 class TorchDataset(torch.utils.data.Dataset):
-    def __init__(self, name, trans_func=None, is_train=True):
+    def __init__(
+            self,
+            name,
+            trans_func=None,
+            is_train=True,
+            base_dir='/home/shortcake7/data/'
+            ):
         # NOTE transformation for test dataset is required
         self.trans_func = trans_func
 
@@ -24,7 +30,9 @@ class TorchDataset(torch.utils.data.Dataset):
             ratio_num = 1.0
         print(f"[ INFO ] Ratio number in {'train' if is_train else 'val'}"
               f" is {ratio_num:.2f}")
-        full_img, full_lbl, self.class_names = READER[name](is_train=is_train)
+        data_dir = os.path.join(base_dir, name)
+        full_img, full_lbl, self.classes = READER[name](
+                is_train=is_train, data_dir=data_dir)
         self.class_counts = self._count_cls(full_img, full_lbl, ratio_num)
         self.file_list, self.label_list = \
             self._split_train_set(full_img, full_lbl)
@@ -58,21 +66,21 @@ class TorchDataset(torch.utils.data.Dataset):
         from collections import Counter
         counter = Counter()
         for lbl_idx in label_list:
-            counter.update([self.class_names[lbl_idx]])
+            counter.update([self.classes[lbl_idx]])
         ratio = (ratio_num / len(file_list)) if ratio_num > 1.0 else ratio_num
         # At least one image per class
-        assert ratio >= len(self.class_names) / len(file_list)
+        assert ratio >= len(self.classes) / len(file_list)
         assert ratio <= 1.0
-        counts = [math.ceil(counter[cls]*ratio) for cls in self.class_names]
+        counts = [math.ceil(counter[cls]*ratio) for cls in self.classes]
         return counts
 
     def _split_train_set(self, full_image, full_label):
         # NOTE: Need check for high-level fixed seed
         partial_img_list, partial_lbl_list = list(), list()
         counter = dict((cls, val) for cls, val
-                       in zip(self.class_names, self.class_counts))
+                       in zip(self.classes, self.class_counts))
         for img, lbl in zip(full_image, full_label):
-            cls = self.class_names[lbl]
+            cls = self.classes[lbl]
             if counter[cls] > 0:
                 partial_img_list.append(img)
                 partial_lbl_list.append(lbl)
@@ -94,7 +102,7 @@ class TorchDataset(torch.utils.data.Dataset):
                 image, label = self.__getitem__(idx_list[x*size+y])
                 image = self._denormalize(image)
                 axes[x][y].imshow(image)
-                axes[x][y].set_title(self.class_names[label])
+                axes[x][y].set_title(self.classes[label])
                 axes[x][y].axis('off')
 
         plt.savefig('example.png')
