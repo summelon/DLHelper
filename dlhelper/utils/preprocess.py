@@ -1,7 +1,7 @@
 import torch
 from torchvision import transforms
 
-from dataset import TorchDataset as Dataset
+from ..dataset import TorchDataset as Dataset
 
 
 def trans_pipeline(is_train):

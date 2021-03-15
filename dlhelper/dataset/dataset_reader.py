@@ -1,4 +1,5 @@
 import os
+import glob
 import itertools
 import pandas as pd
 import numpy as np
@@ -99,12 +100,29 @@ def diabetic_reader(
     return image_list, label_list, class_names
 
 
+def food11_reader(
+        is_train: bool = True,
+        data_dir: str = '/home/data/food11re'):
+    class_names = [
+            'Bread', 'Dairy product', 'Dessert', 'Egg', 'Fried food', 'Meat',
+            'Noodles/Pasta', 'Rice', 'Seafood', 'Soup', 'Vegetable/Fruit']
+    if is_train:
+        image_path = os.path.join(data_dir, 'training/*/*')
+        image_list = glob.glob(image_path)
+    else:
+        image_path = os.path.join(data_dir, 'validation/*/*')
+        image_list = glob.glob(image_path)
+    label_list = [int(p.split('/')[-2]) for p in image_list]
+
+    return image_list, label_list, class_names
+
+
 def main():
     print("--- Food101 ---")
-    food_train_set, _, class_names = food101_reader(True)
-    food_test_set, _, _ = food101_reader(False)
-    print(len(food_train_set))
-    print(len(food_test_set))
+    food101_train_set, _, class_names = food101_reader(True)
+    food101_test_set, _, _ = food101_reader(False)
+    print(len(food101_train_set))
+    print(len(food101_test_set))
     print('Class num: ', len(class_names))
 
     print("--- Stanford dogs ---")
@@ -127,6 +145,15 @@ def main():
     print(len(diabetic_train_set))
     print(len(diabetic_test_set))
     print('Class num: ', len(class_names))
+
+    print("--- Food11 ---")
+    food11_train_set, labels, class_names = food11_reader(True)
+    food11_test_set, _, _ = food11_reader(False)
+    print(len(food11_train_set))
+    print(len(food11_test_set))
+    print('Class num: ', len(class_names))
+
+    return
 
 
 if __name__ == "__main__":
