@@ -2,9 +2,9 @@ import os
 import torch
 from colored import fg, attr
 
-import utils.preprocess as preprocess
-import utils.arguments as arguments
-from model import ResNet
+import dlhelper.utils.preprocess as preprocess
+import dlhelper.utils.arguments as arguments
+from dlhelper.model import ResNet
 
 
 def main():
