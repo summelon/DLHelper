@@ -34,6 +34,7 @@ class TorchDataset(torch.utils.data.Dataset):
         data_dir = os.path.join(base_dir, name)
         full_img, full_lbl, self.classes = READER[name](
                 is_train=is_train, data_dir=data_dir)
+        assert len(full_img) > 0, f"[ Error ] path {data_dir} is wrong!"
         self.class_counts = self._count_cls(full_img, full_lbl, ratio_num)
         self.file_list, self.label_list = \
             self._split_train_set(full_img, full_lbl)

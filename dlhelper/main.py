@@ -15,11 +15,13 @@ def main():
     check_threshold = 0.01  # 1%
 
     train_loader = preprocess.prepare_loader(
-            args.dataset, batch_size=args.batch_size,
-            is_train=True, num_workers=args.num_workers)
+            args.dataset, base_dir=args.base_dir,
+            batch_size=args.batch_size, is_train=True,
+            num_workers=args.num_workers)
     eval_loader = preprocess.prepare_loader(
-            args.dataset, batch_size=args.batch_size,
-            is_train=False, num_workers=args.num_workers)
+            args.dataset, base_dir=args.base_dir,
+            batch_size=args.batch_size, is_train=False,
+            num_workers=args.num_workers)
     num_class = len(train_loader.dataset.classes)
 
     model = ResNet(

@@ -24,6 +24,8 @@ def get_args():
             '--lr', type=float, default=1e-3, help="Learning rate")
     parser.add_argument(
             '--num-workers', type=int, default=16)
+    parser.add_argument(
+            '--base-dir', type=str, default='/home/data/')
 
     # Partial function
     parser.add_argument(

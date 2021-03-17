@@ -21,12 +21,14 @@ def trans_pipeline(is_train):
 
 def prepare_loader(
         name: str,
+        base_dir: str,
         is_train: bool,
         batch_size: int = 128,
         num_workers: int = 5
         ):
     trans_func = trans_pipeline(is_train=is_train)
-    dataset = Dataset(name, trans_func, is_train=is_train)
+    dataset = Dataset(
+            name, trans_func, is_train=is_train, base_dir=base_dir)
     dataloader = torch.utils.data.DataLoader(
             dataset, batch_size=batch_size, pin_memory=True,
             num_workers=num_workers, shuffle=is_train)
