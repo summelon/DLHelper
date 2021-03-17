@@ -110,7 +110,9 @@ class ResNet(torch.nn.Module):
             re_model_key = '.'.join(model_key_component)
 
             for pretrain_key in pretrain_keys:
-                if re.search(re_model_key, pretrain_key) is not None:
+                match_name = re.search(re_model_key, pretrain_key) is not None
+                match_shape = model_state_dict[model_key].shape == state_dict[pretrain_key].shape
+                if match_name and match_shape:
                     match_dict[model_key] = state_dict[pretrain_key]
                     break
 
