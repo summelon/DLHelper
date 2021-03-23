@@ -29,7 +29,8 @@ def main():
             arch='resnet50',
             learning_rate=args.lr,
             finetune=args.finetune,
-            pretrained=True if args.pretrained is None else False)
+            pretrained=True if args.pretrained is None else False,
+            deepmind_byol=args.deepmind_byol)
 
     if args.pretrained is not None:
         state_dict = torch.load(args.pretrained)

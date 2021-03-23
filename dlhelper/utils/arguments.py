@@ -8,42 +8,47 @@ import numpy as np
 def get_args():
     parser = argparse.ArgumentParser()
 
+    # Arch
+    parser.add_argument(
+        '--deepmind-byol', action='store_true',
+        help="To match the performance, use specific resnet arch as BYOL used")
+
     # Training
     parser.add_argument(
-            '--dataset', type=str, help="The name of the dataset")
+        '--dataset', type=str, help="The name of the dataset")
     parser.add_argument(
-            '--pretrained', type=str, default=None,
-            help="Where the pretrained weight is")
+        '--pretrained', type=str, default=None,
+        help="Where the pretrained weight is")
     parser.add_argument(
-            '--checkpoint', type=str, help="Where the checkpoint is stored")
+        '--checkpoint', type=str, help="Where the checkpoint is stored")
     parser.add_argument(
-            '--epochs', type=int, default=100)
+        '--epochs', type=int, default=100)
     parser.add_argument(
-            '--batch-size', type=int, default=512)
+        '--batch-size', type=int, default=512)
     parser.add_argument(
-            '--lr', type=float, default=1e-3, help="Learning rate")
+        '--lr', type=float, default=1e-3, help="Learning rate")
     parser.add_argument(
-            '--num-workers', type=int, default=16)
+        '--num-workers', type=int, default=16)
     parser.add_argument(
-            '--base-dir', type=str, default='/home/data/')
+        '--base-dir', type=str, default='/home/data/')
 
     # Partial function
     parser.add_argument(
-            '--finetune', action='store_true',
-            help="Finetune the last layer or train the whole model")
+        '--finetune', action='store_true',
+        help="Finetune the last layer or train the whole model")
     parser.add_argument(
-            '--test', action='store_true', help="Only test on eval dataset")
+        '--test', action='store_true', help="Only test on eval dataset")
 
     # Reproducibility
     parser.add_argument(
-            '--deterministic', action='store_true',
-            help="Make the result reproducible")
+        '--deterministic', action='store_true',
+        help="Make the result reproducible")
     parser.add_argument(
-            '--seed', type=int, help="Fix random seed for reproducibility")
+        '--seed', type=int, help="Fix random seed for reproducibility")
 
     # Output results for CAM, T-SNE etc.
     parser.add_argument(
-            '--result', type=str, help="The path where the result will be.")
+        '--result', type=str, help="The path where the result will be.")
     args = parser.parse_args()
 
     if args.deterministic or args.seed:

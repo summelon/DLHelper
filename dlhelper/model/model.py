@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from colored import fg, attr
 from sklearn.metrics import ConfusionMatrixDisplay
 
+from . import resnet
+
 
 class ResNet(torch.nn.Module):
     def __init__(
@@ -16,12 +18,16 @@ class ResNet(torch.nn.Module):
             finetune: bool = True,
             pretrained: bool = False,
             learning_rate: float = 1e-3,
+            deepmind_byol: bool = False,
             ):
         super(ResNet, self).__init__()
 
         # Model training components
         self.model = self.select_model(
-                arch, num_class, finetune=finetune, pretrained=pretrained)
+            arch, num_class,
+            finetune=finetune,
+            pretrained=pretrained,
+            deepmind_byol=deepmind_byol)
         self.criterion = torch.nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(
                 self.model.parameters(), lr=learning_rate)
@@ -39,9 +45,19 @@ class ResNet(torch.nn.Module):
         # Debug/visualize
         self.conf_mtx = np.zeros([num_class, num_class])
 
-    def select_model(self, arch, num_class, finetune, pretrained):
+    def select_model(
+            self,
+            arch,
+            num_class,
+            finetune,
+            pretrained,
+            deepmind_byol):
         print(f"[ INFO ] Use torchvision pretrain: {pretrained}")
-        model = torchvision.models.__dict__[arch](pretrained=pretrained)
+        if deepmind_byol:
+            print("[ INFO ] Using specific arch for weight from BYOL")
+            model = resnet.__dict__[arch](pretrained=pretrained)
+        else:
+            model = torchvision.models.__dict__[arch](pretrained=pretrained)
         freeze = not finetune
         for param in model.parameters():
             param.requires_grad = freeze

@@ -299,7 +299,8 @@ if __name__ == '__main__':
 
     dataset = CustomDataset.TorchDataset(args.dataset, is_train=False)
     resnet = CustomModel.ResNet(
-            len(dataset.classes), arch='resnet50', finetune=False)
+            len(dataset.classes), arch='resnet50', finetune=False,
+            deepmind_byol=args.deepmind_byol)
     resnet = load_weight(resnet, args.pretrained)
 
     # Use the real backbone model inside
