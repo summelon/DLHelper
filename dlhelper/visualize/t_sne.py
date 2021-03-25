@@ -1,4 +1,3 @@
-import os
 import tqdm
 import torch
 import random
@@ -26,7 +25,8 @@ class TSNEPainter:
 
     def fit_and_draw(self, file_name):
         print("==> Calculating T-SNE vectors...")
-        tsne_result = TSNE(2, init='pca').fit_transform(self.outputs)
+        estimator = TSNE(perplexity=30, init='pca')
+        tsne_result = estimator.fit_transform(self.outputs)
         x_axis = self._normalize(tsne_result[:, 0])
         y_axis = self._normalize(tsne_result[:, 1])
         self._draw_scatter(x_axis, y_axis, file_name)
@@ -98,16 +98,15 @@ class TSNEPainter:
 
 
 def main():
-    import sys
-    sys.path.append('/home/project/ssl/moco/')
-    from model import ResNet
-    from utils import arguments
-    from utils import preprocess
+    from dlhelper.model import ResNet
+    from dlhelper.utils import arguments
+    from dlhelper.utils import preprocess
 
     args = arguments.get_args()
 
     eval_loader = preprocess.prepare_loader(
-            args.dataset, batch_size=args.batch_size,
+            args.dataset, base_dir=args.base_dir,
+            batch_size=args.batch_size,
             is_train=False, num_workers=args.num_workers)
     num_class = len(eval_loader.dataset.classes)
 

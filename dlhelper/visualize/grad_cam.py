@@ -290,9 +290,9 @@ if __name__ == '__main__':
     Makes the visualization. """
 
     # model = models.resnet50(pretrained=True)
-    import model as CustomModel
-    from utils.arguments import get_args
-    from dataset import random_access_dataset as CustomDataset
+    import dlhelper.model as CustomModel
+    from dlhelper.utils.arguments import get_args
+    from dlhelper.dataset import random_access_dataset as CustomDataset
 
     args = get_args()
     use_cuda = torch.cuda.is_available()
