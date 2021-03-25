@@ -30,7 +30,8 @@ def main():
             learning_rate=args.lr,
             finetune=args.finetune,
             pretrained=True if args.pretrained is None else False,
-            deepmind_byol=args.deepmind_byol)
+            deepmind_byol=args.deepmind_byol,
+            confusion_mtx=args.confusion_mtx)
 
     if args.pretrained is not None:
         state_dict = torch.load(args.pretrained)
@@ -47,28 +48,34 @@ def main():
 
     if args.test:
         eval_loss, eval_acc = model.eval_model(eval_loader)
-        return
+    else:
+        # --- Train loop ---
+        best_acc = 0.0
+        print(f"[ INFO ] Totally {args.epochs} epoch")
+        for e in range(args.epochs):
+            print(f"\n\n=== Epoch: {e} ===")
+            train_loss, train_acc = model.train_model(train_loader)
+            eval_loss, eval_acc = model.eval_model(eval_loader)
 
-    # --- Train loop ---
-    best_acc = 0.0
-    print(f"[ INFO ] Totally {args.epochs} epoch")
-    for e in range(args.epochs):
-        print(f"\n\n=== Epoch: {e} ===")
-        train_loss, train_acc = model.train_model(train_loader)
-        eval_loss, eval_acc = model.eval_model(eval_loader)
+            if (best_acc + check_threshold) < eval_acc:
+                best_acc = eval_acc
+                torch.save(model if whole_model else model.state_dict(),
+                           os.path.join(args.checkpoint, "best.pt"))
+                print(f"=> Saved best model"
+                      f"({fg(208)}eval acc: {best_acc:.2%}{attr(0)}) "
+                      f"in {args.checkpoint}")
+                patience_counter = 0
 
-        if (best_acc + check_threshold) < eval_acc:
-            best_acc = eval_acc
-            torch.save(model if whole_model else model.state_dict(),
-                       os.path.join(args.checkpoint, "best.pt"))
-            print(f"=> Saved best model"
-                  f"({fg(208)}eval acc: {best_acc:.2%}{attr(0)}) "
-                  f"in {args.checkpoint}")
-            patience_counter = 0
+            patience_counter += 1
+            if patience_counter >= patience:
+                break
 
-        patience_counter += 1
-        if patience_counter >= patience:
-            break
+    if args.confusion_mtx:
+        assert args.checkpoint is not None, \
+            "[ Error ] checkpoint path should not be none"
+        conf_mtx_path = os.path.join(args.checkpoint, "confusion.jpg")
+        model.save_conf_mtx(conf_mtx_path)
+
     return
 
 

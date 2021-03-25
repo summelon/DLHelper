@@ -1,3 +1,4 @@
+import os
 import re
 import tqdm
 import torch
@@ -15,10 +16,12 @@ class ResNet(torch.nn.Module):
             self,
             num_class: int,
             arch: str = 'resnet50',
+            learning_rate: float = 1e-3,
+
             finetune: bool = True,
             pretrained: bool = False,
-            learning_rate: float = 1e-3,
             deepmind_byol: bool = False,
+            confusion_mtx: bool = False
             ):
         super(ResNet, self).__init__()
 
@@ -43,7 +46,8 @@ class ResNet(torch.nn.Module):
         self.tot_size, self.tot_loss, self.tot_correct = 0, 0, 0
 
         # Debug/visualize
-        self.conf_mtx = np.zeros([num_class, num_class])
+        self.conf_mtx = None if not confusion_mtx \
+            else np.zeros([num_class, num_class])
 
     def select_model(
             self,
@@ -140,6 +144,7 @@ class ResNet(torch.nn.Module):
         self.tot_loss = 0.0
         self.tot_correct = 0.0
         self.tot_size = 0.0
+        self.conf_mtx = np.zeros_like(self.conf_mtx)
         return
 
     @torch.no_grad()
@@ -147,8 +152,10 @@ class ResNet(torch.nn.Module):
         self.tot_size += pred.shape[0]
         self.tot_loss += loss * pred.shape[0]
         self.tot_correct += torch.sum(pred == gt)
-        for p, g in zip(pred, gt):
-            self.conf_mtx[p][g] += 1
+
+        if self.conf_mtx is not None:
+            for p, g in zip(pred, gt):
+                self.conf_mtx[p][g] += 1
         return
 
     @torch.no_grad()
@@ -157,10 +164,22 @@ class ResNet(torch.nn.Module):
         avg_loss = self.tot_loss / self.tot_size
         print(f"=> {fg(189)}loss: {avg_loss:.3f}, "
               f"{fg(177)}accuracy: {avg_acc:.3%} {attr(0)}")
-        # heat_map = ConfusionMatrixDisplay(self.conf_mtx)
-        # heat_map.plot(include_values=False)
-        # plt.savefig("confusion.jpg")
+
+        if (self.conf_mtx is not None) and (not self.model.training):
+            with np.printoptions(formatter={'all': lambda x: f'{int(x):>5d}'}):
+                print()
+                print(self.conf_mtx)
         return avg_loss, avg_acc
+
+    def save_conf_mtx(self, path):
+        assert self.conf_mtx is not None, \
+            "[ Error ] Set the --confusion_mtx flag in parser!"
+        heat_map = ConfusionMatrixDisplay(self.conf_mtx)
+        heat_map.plot(include_values=False)
+        if '.' not in path.split('/')[-1]:
+            os.path.join(path, 'confusion.jpg')
+        plt.savefig(path)
+        return
 
 
 if __name__ == "__main__":

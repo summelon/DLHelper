@@ -46,9 +46,13 @@ def get_args():
     parser.add_argument(
         '--seed', type=int, help="Fix random seed for reproducibility")
 
-    # Output results for CAM, T-SNE etc.
+    # Visualization
+    #       Output results for CAM, T-SNE etc.
     parser.add_argument(
         '--result', type=str, help="The path where the result will be.")
+    parser.add_argument(
+        '--confusion-mtx', action='store_true',
+        help="Do count & show confusion matrix")
     args = parser.parse_args()
 
     if args.deterministic or args.seed:
