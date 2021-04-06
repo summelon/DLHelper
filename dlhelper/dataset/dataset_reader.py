@@ -82,7 +82,7 @@ def caltech101_reader(
 
 def diabetic_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/diabetic/'
+        data_dir: str = '/home/data/diabetic_retinopathy_detection/'
         ):
     class_names = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
     if is_train:
@@ -102,19 +102,43 @@ def diabetic_reader(
 
 def food11_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/food11re'):
+        data_dir: str = '/home/data/food11'):
     class_names = [
             'Bread', 'Dairy product', 'Dessert', 'Egg', 'Fried food', 'Meat',
             'Noodles/Pasta', 'Rice', 'Seafood', 'Soup', 'Vegetable/Fruit']
     if is_train:
         image_path = os.path.join(data_dir, 'training/*/*')
-        image_list = glob.glob(image_path)
     else:
         image_path = os.path.join(data_dir, 'validation/*/*')
-        image_list = glob.glob(image_path)
+    image_list = glob.glob(image_path)
     label_list = [int(p.split('/')[-2]) for p in image_list]
 
     return image_list, label_list, class_names
+
+
+def imagenette_reader(
+        is_train: bool = True,
+        data_dir: str = '/home/data/imagenette/imagenette2-320'):
+    class_names_dict = {
+        'n01440764': 'tench',
+        'n02102040': 'English_springer',
+        'n02979186': 'cassette_player',
+        'n03000684': 'chain_saw',
+        'n03028079': 'church',
+        'n03394916': 'French_horn',
+        'n03417042': 'garbage_truck',
+        'n03425413': 'gas_pump',
+        'n03445777': 'golf_ball',
+        'n03888257': 'parachute'}
+    if is_train:
+        image_path = os.path.join(data_dir, 'train/*/*')
+    else:
+        image_path = os.path.join(data_dir, 'val/*/*')
+    image_list = glob.glob(image_path)
+    class_dirs = list(class_names_dict.keys())
+    label_list = [class_dirs.index(p.split('/')[-2]) for p in image_list]
+
+    return image_list, label_list, list(class_names_dict.values())
 
 
 def main():
@@ -151,6 +175,13 @@ def main():
     food11_test_set, _, _ = food11_reader(False)
     print(len(food11_train_set))
     print(len(food11_test_set))
+    print('Class num: ', len(class_names))
+
+    print("--- Imagenette ---")
+    imagenette_train_set, labels, class_names = imagenette_reader(True)
+    imagenette_test_set, _, _ = imagenette_reader(False)
+    print(len(imagenette_train_set))
+    print(len(imagenette_test_set))
     print('Class num: ', len(class_names))
 
     return

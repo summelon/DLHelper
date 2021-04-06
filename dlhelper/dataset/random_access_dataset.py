@@ -12,7 +12,8 @@ READER = {
         'stanford_dogs': dsreader.stanford_dogs_reader,
         'food101': dsreader.food101_reader,
         'diabetic': dsreader.diabetic_reader,
-        'food11': dsreader.food11_reader}
+        'food11': dsreader.food11_reader,
+        'imagenette': dsreader.imagenette_reader}
 
 
 class TorchDataset(torch.utils.data.Dataset):
