@@ -27,16 +27,14 @@ class PLDataModule(pl.LightningDataModule):
         self._set_trans_func(trans_func)
 
     def setup(self, stage: Optional[str] = None):
-        if stage == 'fit' or stage is None:
-            self.train_set = self._prepare_dataset(
-                trans_func=self.train_transforms,
-                is_train=True
-            )
-        if stage == 'test' or stage is None:
-            self.test_set = self._prepare_dataset(
-                trans_func=self.test_transforms,
-                is_train=False
-            )
+        self.train_set = self._prepare_dataset(
+            trans_func=self.train_transforms,
+            is_train=True
+        )
+        self.val_set = self._prepare_dataset(
+            trans_func=self.val_transforms,
+            is_train=False
+        )
         return
 
     def train_dataloader(self):
@@ -51,18 +49,18 @@ class PLDataModule(pl.LightningDataModule):
         return train_loader
 
     def val_dataloader(self):
-        raise NotImplementedError("[ Error ] val_dataloader not implement!")
-
-    def test_dataloader(self):
-        test_loader = torch.utils.data.DataLoader(
-            self.test_set,
+        val_loader = torch.utils.data.DataLoader(
+            self.val_set,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=self.num_workers,
             pin_memory=self.pin_memory,
             drop_last=self.drop_last
         )
-        return test_loader
+        return val_loader
+
+    def test_dataloader(self):
+        raise NotImplementedError("[ Error ] test_dataloader not implement!")
 
     def _prepare_dataset(self, trans_func, is_train: bool):
         dataset = TorchDataset(
@@ -82,8 +80,8 @@ class PLDataModule(pl.LightningDataModule):
         ])
         train_trans = trans_func.get('train')
         self.train_transforms = train_trans if train_trans else default_trans
-        test_trans = trans_func.get('test')
-        self.test_transforms = test_trans if test_trans else default_trans
+        val_trans = trans_func.get('val')
+        self.val_transforms = val_trans if val_trans else default_trans
         return
 
 
