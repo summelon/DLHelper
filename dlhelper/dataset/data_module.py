@@ -60,7 +60,16 @@ class PLDataModule(pl.LightningDataModule):
         return val_loader
 
     def test_dataloader(self):
-        raise NotImplementedError("[ Error ] test_dataloader not implement!")
+        print("[INFO] Note using validation set for testing")
+        val_loader = torch.utils.data.DataLoader(
+            self.val_set,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            pin_memory=self.pin_memory,
+            drop_last=self.drop_last
+        )
+        return val_loader
 
     def _prepare_dataset(self, trans_func, is_train: bool):
         dataset = TorchDataset(
