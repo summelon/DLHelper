@@ -6,6 +6,35 @@ import numpy as np
 from scipy.io import loadmat
 
 
+imagenette_names = {
+    # Imagenette
+    'n01440764': 'tench',
+    'n02102040': 'English_springer',
+    'n02979186': 'cassette_player',
+    'n03000684': 'chain_saw',
+    'n03028079': 'church',
+    'n03394916': 'French_horn',
+    'n03417042': 'garbage_truck',
+    'n03425413': 'gas_pump',
+    'n03445777': 'golf_ball',
+    'n03888257': 'parachute',
+}
+
+imagewoof_names = {
+    # Imagewoof
+    "n02093754": "Australian terrier",
+    "n02089973": "Border terrier",
+    "n02099601": "Samoyed",
+    "n02087394": "Beagle",
+    "n02105641": "Shih-Tzu",
+    "n02096294": "English foxhound",
+    "n02088364": "Rhodesian ridgeback",
+    "n02115641": "Dingo",
+    "n02111889": "Golden retriever",
+    "n02086240": "Old English sheepdog",
+}
+
+
 def food101_reader(
         is_train: bool = True,
         data_dir: str = '/home/data/food-101'
@@ -80,20 +109,17 @@ def caltech101_reader(
     return image_list, label_list, class_names
 
 
-def _diabetic_reader(
-        is_train: bool = True,
-        data_dir: str = '/home/data/diabetic_retinopathy_detection/'
-        ):
+def _diabetic_reader(is_train: bool, data_dir: str):
     class_names = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
     if is_train:
-        csv_path = os.path.join(data_dir, '../trainLabels.csv')
+        csv_path = os.path.join(data_dir, 'trainLabels.csv')
         img_root_path = os.path.join(data_dir, 'train')
     else:
-        csv_path = os.path.join(data_dir, '../retinopathy_solution.csv')
+        csv_path = os.path.join(data_dir, 'retinopathy_solution.csv')
         img_root_path = os.path.join(data_dir, 'test')
 
     dataframe = pd.read_csv(csv_path)
-    image_list = [os.path.join(img_root_path, img_name+'.jpeg')
+    image_list = [os.path.join(img_root_path, img_name+'.jpg')
                   for img_name in dataframe.image.to_list()]
     label_list = dataframe.level.to_list()
 
@@ -102,27 +128,28 @@ def _diabetic_reader(
 
 def diabetic_250k_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/diabetic_retinopathy_detection/'
+        data_dir: str = '/home/data/diabetic_retinopathy_detection_250K'
         ):
     return _diabetic_reader(
         is_train=is_train,
-        data_dir=os.path.join(data_dir, "250K_")
+        data_dir=data_dir
     )
 
 
 def diabetic_btgraham_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/diabetic_retinopathy_detection/'
+        data_dir: str = '/home/data/diabetic_retinopathy_detection_btgraham300'
         ):
     return _diabetic_reader(
         is_train=is_train,
-        data_dir=os.path.join(data_dir, "btgraham-300_")
+        data_dir=data_dir
     )
 
 
 def food11_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/food11'):
+        data_dir: str = '/home/data/food11'
+        ):
     class_names = [
             'Bread', 'Dairy product', 'Dessert', 'Egg', 'Fried food', 'Meat',
             'Noodles/Pasta', 'Rice', 'Seafood', 'Soup', 'Vegetable/Fruit']
@@ -136,20 +163,7 @@ def food11_reader(
     return image_list, label_list, class_names
 
 
-def imagenette_reader(
-        is_train: bool = True,
-        data_dir: str = '/home/data/imagenette/imagenette2-320'):
-    class_names_dict = {
-        'n01440764': 'tench',
-        'n02102040': 'English_springer',
-        'n02979186': 'cassette_player',
-        'n03000684': 'chain_saw',
-        'n03028079': 'church',
-        'n03394916': 'French_horn',
-        'n03417042': 'garbage_truck',
-        'n03425413': 'gas_pump',
-        'n03445777': 'golf_ball',
-        'n03888257': 'parachute'}
+def _imagenet_reader(class_names_dict: dict, is_train: bool, data_dir: str):
     if is_train:
         image_path = os.path.join(data_dir, 'train/*/*')
     else:
@@ -161,55 +175,70 @@ def imagenette_reader(
     return image_list, label_list, list(class_names_dict.values())
 
 
+def imagenette_reader(
+        is_train: bool = True,
+        data_dir: str = '/home/data/imagenette'
+        ):
+    return _imagenet_reader(
+        class_names_dict=imagenette_names,
+        is_train=is_train,
+        data_dir=data_dir,
+    )
+
+
+def imagewoof_reader(
+        is_train: bool = True,
+        data_dir: str = '/home/data/imagewoof'
+        ):
+    return _imagenet_reader(
+        class_names_dict=imagewoof_names,
+        is_train=is_train,
+        data_dir=data_dir,
+    )
+
+
+def imagewang_reader(
+        is_train: bool = True,
+        data_dir: str = '/home/data/imagewang'
+        ):
+    names = imagewoof_names
+    if is_train:
+        names.update(imagenette_names)
+
+    return _imagenet_reader(
+        class_names_dict=names,
+        is_train=is_train,
+        data_dir=data_dir,
+    )
+
+
+def _show_fn(name: str, reader_fn: callable):
+    print(f"--- {name} ---")
+    train_set, _, class_names = reader_fn(True)
+    test_set, _, _ = reader_fn(False)
+    print(len(train_set))
+    print(len(test_set))
+    print('Class num: ', len(class_names))
+
+    return
+
+
 def main():
-    print("--- Food101 ---")
-    food101_train_set, _, class_names = food101_reader(True)
-    food101_test_set, _, _ = food101_reader(False)
-    print(len(food101_train_set))
-    print(len(food101_test_set))
-    print('Class num: ', len(class_names))
-
-    print("--- Stanford dogs ---")
-    dog_train_set, _, class_names = stanford_dogs_reader(True)
-    dog_test_set, _, _ = stanford_dogs_reader(False)
-    print(len(dog_train_set))
-    print(len(dog_test_set))
-    print('Class num: ', len(class_names))
-
-    print("--- Caltech101 ---")
-    caltech_train_set, _, class_names = caltech101_reader(True)
-    caltech_test_set, _, _ = caltech101_reader(False)
-    print(len(caltech_train_set))
-    print(len(caltech_test_set))
-    print('Class num: ', len(class_names))
-
-    print("--- Diabetic Retinopathy Detection(250K)---")
-    diabetic_train_set, _, class_names = diabetic_250k_reader(True)
-    diabetic_test_set, _, _ = diabetic_250k_reader(False)
-    print(len(diabetic_train_set))
-    print(len(diabetic_test_set))
-    print('Class num: ', len(class_names))
-
-    print("--- Diabetic Retinopathy Detection(btgraham-300)---")
-    diabetic_train_set, _, class_names = diabetic_btgraham_reader(True)
-    diabetic_test_set, _, _ = diabetic_btgraham_reader(False)
-    print(len(diabetic_train_set))
-    print(len(diabetic_test_set))
-    print('Class num: ', len(class_names))
-
-    print("--- Food11 ---")
-    food11_train_set, labels, class_names = food11_reader(True)
-    food11_test_set, _, _ = food11_reader(False)
-    print(len(food11_train_set))
-    print(len(food11_test_set))
-    print('Class num: ', len(class_names))
-
-    print("--- Imagenette ---")
-    imagenette_train_set, labels, class_names = imagenette_reader(True)
-    imagenette_test_set, _, _ = imagenette_reader(False)
-    print(len(imagenette_train_set))
-    print(len(imagenette_test_set))
-    print('Class num: ', len(class_names))
+    _show_fn("Food101", food101_reader)
+    _show_fn("Food11", food11_reader)
+    _show_fn("Stanford dogs", stanford_dogs_reader)
+    _show_fn("Caltech101", caltech101_reader)
+    _show_fn("Imagenette", imagenette_reader)
+    _show_fn("Imagewoof", imagewoof_reader)
+    _show_fn("Imagewang", imagewang_reader)
+    _show_fn(
+        "Diabetic Retinopathy Detection(250K)",
+        diabetic_250k_reader,
+    )
+    _show_fn(
+        "Diabetic Retinopathy Detection(btgraham-300)",
+        diabetic_btgraham_reader,
+    )
 
     return
 
