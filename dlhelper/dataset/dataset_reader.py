@@ -80,16 +80,16 @@ def caltech101_reader(
     return image_list, label_list, class_names
 
 
-def diabetic_reader(
+def _diabetic_reader(
         is_train: bool = True,
         data_dir: str = '/home/data/diabetic_retinopathy_detection/'
         ):
     class_names = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
     if is_train:
-        csv_path = os.path.join(data_dir, 'trainLabels.csv')
+        csv_path = os.path.join(data_dir, '../trainLabels.csv')
         img_root_path = os.path.join(data_dir, 'train')
     else:
-        csv_path = os.path.join(data_dir, 'retinopathy_solution.csv')
+        csv_path = os.path.join(data_dir, '../retinopathy_solution.csv')
         img_root_path = os.path.join(data_dir, 'test')
 
     dataframe = pd.read_csv(csv_path)
@@ -98,6 +98,26 @@ def diabetic_reader(
     label_list = dataframe.level.to_list()
 
     return image_list, label_list, class_names
+
+
+def diabetic_250k_reader(
+        is_train: bool = True,
+        data_dir: str = '/home/data/diabetic_retinopathy_detection/'
+        ):
+    return _diabetic_reader(
+        is_train=is_train,
+        data_dir=os.path.join(data_dir, "250K_")
+    )
+
+
+def diabetic_btgraham_reader(
+        is_train: bool = True,
+        data_dir: str = '/home/data/diabetic_retinopathy_detection/'
+        ):
+    return _diabetic_reader(
+        is_train=is_train,
+        data_dir=os.path.join(data_dir, "btgraham-300_")
+    )
 
 
 def food11_reader(
@@ -163,9 +183,16 @@ def main():
     print(len(caltech_test_set))
     print('Class num: ', len(class_names))
 
-    print("--- Diabetic Retinopathy Detection---")
-    diabetic_train_set, _, class_names = diabetic_reader(True)
-    diabetic_test_set, _, _ = diabetic_reader(False)
+    print("--- Diabetic Retinopathy Detection(250K)---")
+    diabetic_train_set, _, class_names = diabetic_250k_reader(True)
+    diabetic_test_set, _, _ = diabetic_250k_reader(False)
+    print(len(diabetic_train_set))
+    print(len(diabetic_test_set))
+    print('Class num: ', len(class_names))
+
+    print("--- Diabetic Retinopathy Detection(btgraham-300)---")
+    diabetic_train_set, _, class_names = diabetic_btgraham_reader(True)
+    diabetic_test_set, _, _ = diabetic_btgraham_reader(False)
     print(len(diabetic_train_set))
     print(len(diabetic_test_set))
     print('Class num: ', len(class_names))
