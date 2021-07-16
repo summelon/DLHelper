@@ -128,7 +128,7 @@ def _diabetic_reader(is_train: bool, data_dir: str):
 
 def diabetic_250k_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/diabetic_retinopathy_detection_250K'
+        data_dir: str = '/home/data/diabetic_250k'
         ):
     return _diabetic_reader(
         is_train=is_train,
@@ -138,7 +138,7 @@ def diabetic_250k_reader(
 
 def diabetic_btgraham_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/diabetic_retinopathy_detection_btgraham300'
+        data_dir: str = '/home/data/diabetic_btgraham'
         ):
     return _diabetic_reader(
         is_train=is_train,
@@ -199,17 +199,37 @@ def imagewoof_reader(
 
 def imagewang_reader(
         is_train: bool = True,
+        is_ssl_pretrain: bool = True,
         data_dir: str = '/home/data/imagewang'
         ):
-    names = imagewoof_names
+    """
+        NOTE: train set in SSL pretraining is untrustable
+                since part of data label cannot confirm in unsup/
+    """
+    # Manipulate on a new dict
+    class_name_dict = imagewoof_names.copy()
     if is_train:
-        names.update(imagenette_names)
+        train_path = os.path.join(data_dir, "train/*/*")
+        image_list = glob.glob(train_path)
+        # For self-supervised pretraining
+        if is_ssl_pretrain:
+            unsup_path = os.path.join(data_dir, "unsup/*")
+            image_list += glob.glob(unsup_path)
+            class_name_dict.update(imagenette_names)
+            class_name_dict.update({"unsup": "no_label"})
+        # For linear evaluation
+        else:
+            cls_names = list(class_name_dict.keys())
+            # Only keep 10% imagewoof data in train set
+            image_list = [p for n in cls_names for p in image_list if n in p]
+    else:
+        val_path = os.path.join(data_dir, "val/*/*")
+        image_list = glob.glob(val_path)
 
-    return _imagenet_reader(
-        class_names_dict=names,
-        is_train=is_train,
-        data_dir=data_dir,
-    )
+    class_dirs = list(class_name_dict.keys())
+    label_list = [class_dirs.index(p.split('/')[-2]) for p in image_list]
+
+    return image_list, label_list, list(class_name_dict.values())
 
 
 def _show_fn(name: str, reader_fn: callable):

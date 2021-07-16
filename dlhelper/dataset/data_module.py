@@ -15,9 +15,11 @@ class PLDataModule(pl.LightningDataModule):
         trans_func: dict = dict(),
         num_workers: int = 8,
         pin_memory: bool = True,
-        drop_last: bool = False
+        drop_last: bool = False,
+        **kwargs,
     ):
         super().__init__()
+        self.specific_kwargs = kwargs
         self.name = dataset_name
         self.base_dir = base_dir
         self.batch_size = batch_size
@@ -76,7 +78,8 @@ class PLDataModule(pl.LightningDataModule):
             name=self.name,
             trans_func=trans_func,
             is_train=is_train,
-            base_dir=self.base_dir
+            base_dir=self.base_dir,
+            **self.specific_kwargs,
         )
         return dataset
 
