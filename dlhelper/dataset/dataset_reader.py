@@ -37,7 +37,8 @@ imagewoof_names = {
 
 def food101_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/food-101'
+        data_dir: str = '/home/data/food-101',
+        **kwargs,
         ):
     meta_path = os.path.join(data_dir, 'meta')
     image_path = os.path.join(data_dir, 'images')
@@ -62,7 +63,8 @@ def food101_reader(
 
 def stanford_dogs_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/stanford_dogs'
+        data_dir: str = '/home/data/stanford_dogs',
+        **kwargs,
         ):
     image_path = os.path.join(data_dir, 'Images')
 
@@ -81,7 +83,8 @@ def stanford_dogs_reader(
 
 def caltech101_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/caltech101'
+        data_dir: str = '/home/data/caltech101',
+        **kwargs,
         ):
     image_path = os.path.join(data_dir, '101_ObjectCategories')
     np.random.seed(1234)
@@ -109,7 +112,7 @@ def caltech101_reader(
     return image_list, label_list, class_names
 
 
-def _diabetic_reader(is_train: bool, data_dir: str):
+def _diabetic_reader(is_train: bool, data_dir: str, **kwargs):
     class_names = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
     if is_train:
         csv_path = os.path.join(data_dir, 'trainLabels.csv')
@@ -128,7 +131,8 @@ def _diabetic_reader(is_train: bool, data_dir: str):
 
 def diabetic_250k_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/diabetic_250k'
+        data_dir: str = '/home/data/diabetic_250k',
+        **kwargs,
         ):
     return _diabetic_reader(
         is_train=is_train,
@@ -138,7 +142,8 @@ def diabetic_250k_reader(
 
 def diabetic_btgraham_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/diabetic_btgraham'
+        data_dir: str = '/home/data/diabetic_btgraham',
+        **kwargs,
         ):
     return _diabetic_reader(
         is_train=is_train,
@@ -148,7 +153,8 @@ def diabetic_btgraham_reader(
 
 def food11_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/food11'
+        data_dir: str = '/home/data/food11',
+        **kwargs,
         ):
     class_names = [
             'Bread', 'Dairy product', 'Dessert', 'Egg', 'Fried food', 'Meat',
@@ -163,7 +169,12 @@ def food11_reader(
     return image_list, label_list, class_names
 
 
-def _imagenet_reader(class_names_dict: dict, is_train: bool, data_dir: str):
+def _imagenet_reader(
+        class_names_dict: dict,
+        is_train: bool,
+        data_dir: str,
+        **kwargs,
+        ):
     if is_train:
         image_path = os.path.join(data_dir, 'train/*/*')
     else:
@@ -177,7 +188,8 @@ def _imagenet_reader(class_names_dict: dict, is_train: bool, data_dir: str):
 
 def imagenette_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/imagenette'
+        data_dir: str = '/home/data/imagenette',
+        **kwargs,
         ):
     return _imagenet_reader(
         class_names_dict=imagenette_names,
@@ -188,7 +200,8 @@ def imagenette_reader(
 
 def imagewoof_reader(
         is_train: bool = True,
-        data_dir: str = '/home/data/imagewoof'
+        data_dir: str = '/home/data/imagewoof',
+        **kwargs,
         ):
     return _imagenet_reader(
         class_names_dict=imagewoof_names,
@@ -200,7 +213,8 @@ def imagewoof_reader(
 def imagewang_reader(
         is_train: bool = True,
         is_ssl_pretrain: bool = True,
-        data_dir: str = '/home/data/imagewang'
+        data_dir: str = '/home/data/imagewang',
+        **kwargs,
         ):
     """
         NOTE: train set in SSL pretraining is untrustable
