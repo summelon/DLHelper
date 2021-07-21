@@ -169,10 +169,9 @@ def food11_reader(
     return image_list, label_list, class_names
 
 
-def _imagenet_reader(
-        class_names_dict: dict,
-        is_train: bool,
-        data_dir: str,
+def imagenette_reader(
+        is_train: bool = True,
+        data_dir: str = '/home/data/imagenette',
         **kwargs,
         ):
     if is_train:
@@ -180,34 +179,30 @@ def _imagenet_reader(
     else:
         image_path = os.path.join(data_dir, 'val/*/*')
     image_list = glob.glob(image_path)
-    class_dirs = list(class_names_dict.keys())
+    class_dirs = list(imagenette_names.keys())
     label_list = [class_dirs.index(p.split('/')[-2]) for p in image_list]
 
-    return image_list, label_list, list(class_names_dict.values())
-
-
-def imagenette_reader(
-        is_train: bool = True,
-        data_dir: str = '/home/data/imagenette',
-        **kwargs,
-        ):
-    return _imagenet_reader(
-        class_names_dict=imagenette_names,
-        is_train=is_train,
-        data_dir=data_dir,
-    )
+    return image_list, label_list, list(imagenette_names.values())
 
 
 def imagewoof_reader(
         is_train: bool = True,
         data_dir: str = '/home/data/imagewoof',
+        noise_percent: int = 0,
         **kwargs,
         ):
-    return _imagenet_reader(
-        class_names_dict=imagewoof_names,
-        is_train=is_train,
-        data_dir=data_dir,
-    )
+    assert noise_percent in [0, 1, 5, 25, 50], \
+        "[Error] only [0, 1, 5, 25, 50] noise percentage" \
+        f" is available, but not {noise_percent}!"
+
+    csv_file = pd.read_csv(os.path.join(data_dir, "noisy_imagewoof.csv"))
+    column = "noisy_labels_" + str(noise_percent)
+    data_frame = csv_file[csv_file["is_valid"] != is_train]
+    image_list = [os.path.join(data_dir, p) for p in data_frame["path"]]
+    class_dirs = list(imagewoof_names.keys())
+    label_list = [class_dirs.index(label) for label in data_frame[column]]
+
+    return image_list, label_list, list(imagewoof_names.values())
 
 
 def imagewang_reader(
