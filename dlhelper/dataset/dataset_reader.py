@@ -4,6 +4,7 @@ import itertools
 import pandas as pd
 import numpy as np
 from scipy.io import loadmat
+from typing import Optional
 
 
 imagenette_names = {
@@ -209,6 +210,7 @@ def imagewang_reader(
         is_train: bool = True,
         is_ssl_pretrain: bool = True,
         data_dir: str = '/home/data/imagewang',
+        ood_file: Optional[str] = None,
         **kwargs,
         ):
     """
@@ -231,6 +233,12 @@ def imagewang_reader(
             cls_names = list(class_name_dict.keys())
             # Only keep 10% imagewoof data in train set
             image_list = [p for n in cls_names for p in image_list if n in p]
+        # Filter Out-of-Distribution images
+        if ood_file is not None:
+            ood_file_names = open(ood_file, 'r').read().splitlines()
+            image_list = [n for n in image_list
+                          if n.split('/')[-1] not in ood_file_names]
+            print(f"[INFO] Using ood file, remained sample: {len(image_list)}")
     else:
         val_path = os.path.join(data_dir, "val/*/*")
         image_list = glob.glob(val_path)
