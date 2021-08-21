@@ -116,16 +116,17 @@ def caltech101_reader(
 def _diabetic_reader(is_train: bool, data_dir: str, **kwargs):
     class_names = ['No DR', 'Mild', 'Moderate', 'Severe', 'Proliferative DR']
     if is_train:
-        csv_path = os.path.join(data_dir, 'trainLabels.csv')
+        csv_name = "trainLabels.csv"
         img_root_path = os.path.join(data_dir, 'train')
     else:
-        csv_path = os.path.join(data_dir, 'retinopathy_solution.csv')
+        csv_name = "retinopathy_solution.csv"
         img_root_path = os.path.join(data_dir, 'test')
 
-    dataframe = pd.read_csv(csv_path)
-    image_list = [os.path.join(img_root_path, img_name+'.jpg')
-                  for img_name in dataframe.image.to_list()]
-    label_list = dataframe.level.to_list()
+    image_list = glob.glob(img_root_path+"/*jpg")
+    image_name_list = [f.split('/')[-1].split('.')[0] for f in image_list]
+    csv_path = os.path.join(data_dir, csv_name)
+    dataframe = pd.read_csv(csv_path).set_index("image")
+    label_list = dataframe.loc[image_name_list]["level"].to_list()
 
     return image_list, label_list, class_names
 
